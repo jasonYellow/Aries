@@ -1,2 +1,2 @@
 # Aries
-FREERDP REMOTERFX DEMO
+freerdp remoterfx codec & decodec demo
