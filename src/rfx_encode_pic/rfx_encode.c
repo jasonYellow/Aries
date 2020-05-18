@@ -1,4 +1,5 @@
 #include "rfx_encode.h"
+#include <sys/time.h>
 
 int main()
 {
@@ -12,6 +13,8 @@ int main()
 	BITMAPV5HEADER *bitmapv5_header;
 	int ret;
 	int stride;
+	struct timeval start, end;
+	int interval;
 
 	context = rfx_context_new(TRUE);
 	if (!context)
@@ -30,7 +33,6 @@ int main()
 	context->width = 1920;
 	context->height = 1080;
 	s = Stream_New(NULL, 0xFFFF);
-	stride = 1920 * 4;
 
         bitmap_file_header = malloc(sizeof(BITMAPFILEHEADER));
 	bitmapv5_header = malloc(sizeof(BITMAPV5HEADER));        
@@ -51,6 +53,8 @@ int main()
 	rect.width = bitmapv5_header->bV5Width;
 	rect.height = bitmapv5_header->bV5Height;
 
+	stride = bitmapv5_header->bV5Width * 4;
+
 	printf("fread\n");
 
         pSrcData = malloc(bitmapv5_header->bV5SizeImage);
@@ -65,6 +69,7 @@ int main()
 
         printf("fwrite\n");
 
+	gettimeofday(&start, NULL);
 	if (!(rfx_compose_message(context, s, &rect, 1, pSrcData, rect.width, rect.height, stride)))
 	{
 		printf("compose message failed\n");
@@ -74,6 +79,9 @@ int main()
 	{
 		printf("compose message successed\n");
 	}
+	gettimeofday(&end, NULL);
+	interval = (end.tv_sec - start.tv_sec) * 1000 + (end.tv_usec - start.tv_usec)/1000;
+	printf("interval:%d\n",interval);
 
 	int bitmapDataLength = Stream_GetPosition(s);
 	BYTE *bitmapData = Stream_Buffer(s);
