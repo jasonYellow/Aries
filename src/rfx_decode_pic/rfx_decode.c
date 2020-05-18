@@ -4,53 +4,10 @@
 #include <freerdp/freerdp.h>
 #include <freerdp/codec/rfx.h>
 
-#define IMG_WIDTH 64
-#define IMG_HEIGHT 64
+#define IMG_WIDTH 1920
+#define IMG_HEIGHT 1080
 #define FORMAT_SIZE 4
 #define FORMAT PIXEL_FORMAT_BGRA32
-
-static INLINE size_t fuzzyCompare(BYTE b1, BYTE b2)
-{
-	if (b1 > b2)
-		return b1 - b2;
-	return b2 - b1;
-}
-
-static BOOL fuzzyCompareImage(const UINT32* refImage, const BYTE* img, size_t npixels)
-{
-	size_t i;
-	size_t totalDelta = 0;
-
-	for (i = 0; i < npixels; i++, refImage++)
-	{
-		BYTE A = *img++;
-		BYTE R = *img++;
-		BYTE G = *img++;
-		BYTE B = *img++;
-		size_t delta;
-
-		if (A != 0x00)
-			return FALSE;
-
-		delta = fuzzyCompare(R, (*refImage & 0x00ff0000) >> 16);
-		if (delta > 1)
-			return FALSE;
-		totalDelta += delta;
-
-		delta = fuzzyCompare(G, (*refImage & 0x0000ff00) >> 8);
-		if (delta > 1)
-			return FALSE;
-		totalDelta += delta;
-
-		delta = fuzzyCompare(B, (*refImage & 0x0000ff));
-		if (delta > 1)
-			return FALSE;
-		totalDelta += delta;
-	}
-
-	WLog_DBG("test", "totalDelta=%d (npixels=%d)", totalDelta, npixels);
-	return TRUE;
-}
 
 int main(int argc, char* argv[])
 {
@@ -60,13 +17,13 @@ int main(int argc, char* argv[])
 	BYTE* dest = NULL;
 	BYTE* src = NULL;
 	int ret = 0;
-	size_t stride = FORMAT_SIZE * 256;
+	size_t stride = FORMAT_SIZE * IMG_WIDTH;
 
 	context = rfx_context_new(FALSE);
 	if (!context)
 		goto fail;
 
-	dest = calloc(256 * 256, FORMAT_SIZE);
+	dest = calloc(IMG_WIDTH * IMG_HEIGHT, FORMAT_SIZE);
 	if (!dest)
 		goto fail;
 
@@ -84,7 +41,7 @@ int main(int argc, char* argv[])
 
 	region16_init(&region);
 	if (!rfx_process_message(context, src, size, 0, 0, dest,
-	                         FORMAT, stride, 256, &region))
+	                         FORMAT, stride, IMG_HEIGHT, &region))
 		goto fail;
 	region16_print(&region);
 
@@ -100,7 +57,7 @@ int main(int argc, char* argv[])
 	BYTE *head = malloc(size_head);
 	fread(head,1,size_head,fp_head);
 	fwrite(head, size_head, 1, fp);
-	fwrite(dest, 256 * 256, FORMAT_SIZE, fp);
+	fwrite(dest, IMG_WIDTH * IMG_HEIGHT, FORMAT_SIZE, fp);
 	fclose(fp);
 #endif
 /*

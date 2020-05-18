@@ -30,7 +30,7 @@ int main()
 	context->width = 1920;
 	context->height = 1080;
 	s = Stream_New(NULL, 0xFFFF);
-	stride = 256 * 4;
+	stride = 1920 * 4;
 
         bitmap_file_header = malloc(sizeof(BITMAPFILEHEADER));
 	bitmapv5_header = malloc(sizeof(BITMAPV5HEADER));        
@@ -42,7 +42,7 @@ int main()
 	printf("bfSize:%d,bfOffBits:%d\n",bitmap_file_header->bfSize,bitmap_file_header->bfOffBits);
 	ret = fread ( bitmapv5_header, 1, sizeof(BITMAPV5HEADER), f);
 	ret = fwrite ( bitmapv5_header, sizeof(BITMAPV5HEADER),1, fp);
-	printf("bV5Width:%d,bV5Height:%d\n",bitmapv5_header->bV5Width,bitmapv5_header->bV5Height);
+	printf("bV5Width:%d,bV5Height:%d,bV5SizeImage:%d\n",bitmapv5_header->bV5Width,bitmapv5_header->bV5Height,bitmapv5_header->bV5SizeImage);
 	fclose(fp);
 
 
@@ -53,14 +53,14 @@ int main()
 
 	printf("fread\n");
 
-        pSrcData = calloc( rect.width * rect.height , FORMAT_SIZE);
+        pSrcData = malloc(bitmapv5_header->bV5SizeImage);
 	//memcpy(pSrcData,(BYTE*)refImage,IMG_WIDTH * IMG_HEIGHT * FORMAT_SIZE);
         //pSrcData = (BYTE*)refImage;
-	ret = fread ( pSrcData, rect.width * rect.height * FORMAT_SIZE, 1, f);
+	ret = fread ( pSrcData, bitmapv5_header->bV5SizeImage, 1, f);
         fclose(f);
 
 	f = fopen("/tmp/rgba.data", "w");
-	ret = fwrite ( pSrcData, rect.width * rect.height * FORMAT_SIZE, 1, f);
+	ret = fwrite ( pSrcData, bitmapv5_header->bV5SizeImage , 1, f);
         fclose(f);
 
         printf("fwrite\n");
