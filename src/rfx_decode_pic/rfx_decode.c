@@ -7,7 +7,7 @@
 #define IMG_WIDTH 64
 #define IMG_HEIGHT 64
 #define FORMAT_SIZE 4
-#define FORMAT PIXEL_FORMAT_XRGB32
+#define FORMAT PIXEL_FORMAT_BGRA32
 
 static INLINE size_t fuzzyCompare(BYTE b1, BYTE b2)
 {
@@ -59,6 +59,7 @@ int main(int argc, char* argv[])
 	RFX_CONTEXT* context = NULL;
 	BYTE* dest = NULL;
 	BYTE* src = NULL;
+	int ret = 0;
 	size_t stride = FORMAT_SIZE * 256;
 
 	context = rfx_context_new(FALSE);
@@ -71,18 +72,18 @@ int main(int argc, char* argv[])
 
 	FILE *f;
 	f = fopen("/tmp/encode.data","r");
-	fseek(f,0L,SEEK_END);  
+	ret = fseek(f,0L,SEEK_END);  
     	int size=ftell(f);
 	printf("file len:%d\n",size);
 
 	src = malloc(size);
 
 	fseek(f,0,SEEK_SET);
-	fread(src,1,size,f);
+	ret = fread(src,1,size,f);
 	fclose(f);
 
 	region16_init(&region);
-	if (!rfx_process_message(context, src, size+256, 0, 0, dest,
+	if (!rfx_process_message(context, src, size, 0, 0, dest,
 	                         FORMAT, stride, 256, &region))
 		goto fail;
 	region16_print(&region);
@@ -90,7 +91,15 @@ int main(int argc, char* argv[])
 	printf("process message successed\n");
 
 #if 1
-	FILE *fp = fopen("/tmp/windows.data", "w");
+	FILE *fp = fopen("/tmp/decode.bmp", "w");
+	FILE *fp_head = fopen("/tmp/head", "r");
+	ret = fseek(fp_head,0L,SEEK_END);
+        int size_head=ftell(fp_head);
+        printf("head len:%d\n",size_head);
+	fseek(fp_head,0,SEEK_SET);
+	BYTE *head = malloc(size_head);
+	fread(head,1,size_head,fp_head);
+	fwrite(head, size_head, 1, fp);
 	fwrite(dest, 256 * 256, FORMAT_SIZE, fp);
 	fclose(fp);
 #endif

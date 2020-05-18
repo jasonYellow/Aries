@@ -7,7 +7,7 @@ int main()
 	RFX_RECT rect;
 	BYTE* pSrcData = NULL;
 	wStream* s;	
-	FILE *f = NULL;
+	FILE *f,*fp = NULL;
 	BITMAPFILEHEADER *bitmap_file_header;
 	BITMAPV5HEADER *bitmapv5_header;
 	int ret;
@@ -35,14 +35,16 @@ int main()
         bitmap_file_header = malloc(sizeof(BITMAPFILEHEADER));
 	bitmapv5_header = malloc(sizeof(BITMAPV5HEADER));        
 
-	printf("malloc:%d,%d\n",bitmap_file_header,bitmapv5_header);
-
+	fp = fopen("/tmp/head","w");
 	f = fopen("/tmp/pic.bmp", "r");
-	printf("f:%d\n",f);
 	ret = fread ( bitmap_file_header, 1, sizeof(BITMAPFILEHEADER), f);
+	ret = fwrite ( bitmap_file_header, sizeof(BITMAPFILEHEADER),1, fp);
 	printf("bfSize:%d,bfOffBits:%d\n",bitmap_file_header->bfSize,bitmap_file_header->bfOffBits);
 	ret = fread ( bitmapv5_header, 1, sizeof(BITMAPV5HEADER), f);
+	ret = fwrite ( bitmapv5_header, sizeof(BITMAPV5HEADER),1, fp);
 	printf("bV5Width:%d,bV5Height:%d\n",bitmapv5_header->bV5Width,bitmapv5_header->bV5Height);
+	fclose(fp);
+
 
 	rect.x = 0;
 	rect.y = 0;
