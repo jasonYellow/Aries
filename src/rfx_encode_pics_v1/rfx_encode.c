@@ -16,6 +16,7 @@ int main()
 	struct timeval start, end;
 	int interval = 0;
 	int i;
+	int tmp;
 	char   *filename;   
 
 	filename = malloc(100);
@@ -48,12 +49,10 @@ int main()
 
         pSrcData = malloc(1920 * 1080 * 4);
 
-	fp_head = fopen("/tmp/head","rb");
-	pSrcHead = malloc(138);
-	ret = fread(pSrcHead, 138, 1, fp_head);
+	fp_head = fopen("/tmp/headv1","rb");
+	pSrcHead = malloc(54);
+	ret = fread(pSrcHead, 54, 1, fp_head);
  
-	printf("12222\n");
-
 	for(i = 0;i < BITMAP_CNT;i++)
 	{
 		s = Stream_New(NULL, 0xFFFF);
@@ -66,17 +65,20 @@ int main()
                 	goto fail;
         	}
                 gettimeofday(&end, NULL);
-        	interval += (end.tv_sec - start.tv_sec) * 1000 + (end.tv_usec - start.tv_usec)/1000;
+		tmp = (end.tv_sec - start.tv_sec) * 1000 + (end.tv_usec - start.tv_usec)/1000;
+        	interval += tmp;
 
 		int32_t bitmapDataLength = Stream_GetPosition(s);
-                printf("encode data len:%d\n",bitmapDataLength);
+                //printf("encode data len:%d\n",bitmapDataLength);
                 BYTE *bitmapData = Stream_Buffer(s);
 
 		if(i%10 == 0)
                 {
+			printf("pic[%d] encode time:%d\n",i/10,tmp);
+
                         sprintf(filename,"/tmp/%d.bmp",i/10);
                         fp_pic = fopen(filename,"wb");
-                        ret = fwrite ( pSrcHead, 138, 1, fp_pic);
+                        ret = fwrite ( pSrcHead, 54, 1, fp_pic);
                         ret = fwrite ( pSrcData, 1920*1080*4, 1, fp_pic);
                         fclose(fp_pic);
 			

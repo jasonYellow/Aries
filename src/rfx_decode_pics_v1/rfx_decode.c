@@ -13,7 +13,7 @@
 #define IMG_INDEX  12
 #define IMG_NUM 100 
 
-#define HEAD_SIZE 138
+#define HEAD_SIZE 54 
 
 
 int main(int argc, char* argv[])
@@ -67,10 +67,10 @@ int main(int argc, char* argv[])
 			sprintf(filename,"/tmp/decode_%d.bmp",i/10);
 			
 			FILE *fp = fopen(filename, "wb");
-        		FILE *fp_head = fopen("/tmp/head", "rb");
-       			BYTE *head = malloc(HEAD_SIZE);
-        		ret = fread(head,1,HEAD_SIZE,fp_head);
-        		ret = fwrite(head, HEAD_SIZE, 1, fp);
+        		FILE *fp_head = fopen("/tmp/headv1", "rb");
+       			BYTE *headv1 = malloc(HEAD_SIZE);
+        		ret = fread(headv1,1,HEAD_SIZE,fp_head);
+        		ret = fwrite(headv1, HEAD_SIZE, 1, fp);
         		ret = fwrite(dest, IMG_WIDTH * IMG_HEIGHT, FORMAT_SIZE, fp);
         		fclose(fp);
         		fclose(fp_head);
